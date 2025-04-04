@@ -18,9 +18,9 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete })
   
   const generateShareMessage = () => {
     return `📢 ${event.title}\n` +
-           `📅 ${new Date(event.datetime).toLocaleDateString()} 
-           `🕒 ${new Date(event.datetime).toLocaleTimeString()}\n` +
-           `📍 ${event.location}\n` 
+           `📅 ${new Date(event.datetime).toLocaleDateString()} | 🕒 ${new Date(event.datetime).toLocaleTimeString()}\n` +
+           `📍 ${event.location}\n` +
+           `🔗 ${eventUrl}\n` +
            `#CulturaViva #Eventos`;
   };
 
