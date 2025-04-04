@@ -17,11 +17,10 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete })
   const eventUrl = `${window.location.origin}/event/${event.id}`;
   
   const generateShareMessage = () => {
-    return `📢 ${text.Agenda Cultural}\n` +
-          `📢 ${event.title}\n` +
-           `📅 ${new Date(event.datetime).toLocaleDateString()} | 🕒 ${new Date(event.datetime).toLocaleTimeString()}\n` +
-           `📍 ${event.location}\n` +
-           `🔗 ${eventUrl}\n` +
+    return `📢 ${event.title}\n` +
+           `📅 ${new Date(event.datetime).toLocaleDateString()} 
+           `🕒 ${new Date(event.datetime).toLocaleTimeString()}\n` +
+           `📍 ${event.location}\n` 
            `#CulturaViva #Eventos`;
   };
 
