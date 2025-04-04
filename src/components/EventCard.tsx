@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { EventFormData } from '../types';
-import { Calendar, MapPin, Users, Edit, Trash2, Share2, Download, Copy, QrCode } from 'lucide-react';
+import { Calendar, MapPin, Users, Edit, Trash2, Share2, Download, Copy, QrCode, Heart, Bell } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { FacebookShareButton, TwitterShareButton, WhatsappShareButton } from 'react-share';
 import QRCode from 'react-qr-code';
@@ -10,10 +10,20 @@ interface EventCardProps {
   event: EventFormData;
   onEdit: (event: EventFormData) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (id: string) => void;
+  onToggleReminder: (id: string, minutesBefore: number) => void;
 }
 
-export const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
+export const EventCard: React.FC<EventCardProps> = ({
+  event,
+  onEdit,
+  onDelete,
+  onToggleFavorite,
+  onToggleReminder,
+}) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [reminderMinutes, setReminderMinutes] = useState(30);
   const eventUrl = `${window.location.origin}/event/${event.id}`;
   
   const generateShareMessage = () => {
@@ -78,6 +88,12 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete })
     }
   };
 
+  const handleSetReminder = () => {
+    onToggleReminder(event.id, reminderMinutes);
+    setIsReminderModalOpen(false);
+    toast.success('Recordatorio configurado exitosamente');
+  };
+
   return (
     <>
       <div id={`event-card-${event.id}`} className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -93,6 +109,28 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete })
               <h3 className="mt-2 text-xl font-bold text-gray-900">{event.title}</h3>
             </div>
             <div className="flex space-x-2">
+              <button
+                onClick={() => onToggleFavorite(event.id)}
+                className={`p-2 transition-colors ${
+                  event.isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+                }`}
+              >
+                <Heart
+                  size={20}
+                  fill={event.isFavorite ? 'currentColor' : 'none'}
+                />
+              </button>
+              <button
+                onClick={() => setIsReminderModalOpen(true)}
+                className={`p-2 transition-colors ${
+                  event.reminder?.enabled ? 'text-purple-500' : 'text-gray-400 hover:text-purple-500'
+                }`}
+              >
+                <Bell
+                  size={20}
+                  fill={event.reminder?.enabled ? 'currentColor' : 'none'}
+                />
+              </button>
               <button
                 onClick={() => onEdit(event)}
                 className="p-2 text-gray-600 hover:text-purple-600 transition-colors"
@@ -139,6 +177,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete })
         </div>
       </div>
 
+      {/* Share Modal */}
       {isShareModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md">
@@ -206,6 +245,51 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete })
                 >
                   Cerrar
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reminder Modal */}
+      {isReminderModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-md">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Configurar Recordatorio</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Minutos antes del evento
+                  </label>
+                  <select
+                    value={reminderMinutes}
+                    onChange={(e) => setReminderMinutes(Number(e.target.value))}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value={15}>15 minutos</option>
+                    <option value={30}>30 minutos</option>
+                    <option value={60}>1 hora</option>
+                    <option value={120}>2 horas</option>
+                    <option value={1440}>1 día</option>
+                  </select>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setIsReminderModalOpen(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSetReminder}
+                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  >
+                    Guardar
+                  </button>
+                </div>
               </div>
             </div>
           </div>

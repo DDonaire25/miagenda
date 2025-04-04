@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Calendar, Plus } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { EventForm } from './components/EventForm';
 import { EventList } from './components/EventList';
 import { EventDetails } from './components/EventDetails';
+import { Navbar } from './components/Navbar';
+import { FavoritesSection } from './components/FavoritesSection';
+import { ProfileEditor } from './components/ProfileEditor';
 import { useEvents } from './hooks/useEvents';
-import { EventFormData } from './types';
+import { EventFormData, ActiveSection } from './types';
 import { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<ActiveSection>(null);
   const [editingEvent, setEditingEvent] = useState<EventFormData | undefined>();
-  const { events, addEvent, updateEvent, deleteEvent, filters, setFilters } = useEvents();
+  const { events, addEvent, updateEvent, deleteEvent, toggleFavorite, filters, setFilters } = useEvents();
 
   const handleEdit = (event: EventFormData) => {
     setEditingEvent(event);
-    setIsFormOpen(true);
+    setActiveSection('create');
   };
 
   const handleSubmit = (eventData: Omit<EventFormData, 'id'>) => {
@@ -24,62 +28,111 @@ function App() {
     } else {
       addEvent(eventData);
     }
+    setActiveSection(null);
   };
 
   const handleCloseForm = () => {
-    setIsFormOpen(false);
+    setActiveSection(null);
     setEditingEvent(undefined);
+  };
+
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case 'search':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-16 left-0 right-0 bg-white shadow-lg p-4 z-40"
+          >
+            <EventList
+              events={events}
+              onEdit={handleEdit}
+              onDelete={deleteEvent}
+              filters={filters}
+              onFilterChange={setFilters}
+              onToggleFavorite={toggleFavorite}
+            />
+          </motion.div>
+        );
+      case 'favorites':
+        return (
+          <FavoritesSection
+            events={events}
+            onEdit={handleEdit}
+            onDelete={deleteEvent}
+            onToggleFavorite={toggleFavorite}
+          />
+        );
+      case 'create':
+        return (
+          <EventForm
+            onSubmit={handleSubmit}
+            onClose={handleCloseForm}
+            initialData={editingEvent}
+          />
+        );
+      case 'profile':
+        return <ProfileEditor />;
+      default:
+        return null;
+    }
   };
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pb-16">
         <Toaster position="top-right" />
         
         {/* Header */}
         <header className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
+          <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
             <div className="flex items-center space-x-2">
               <Calendar className="h-8 w-8 text-purple-600" />
               <h1 className="text-2xl font-bold text-gray-900">Agenda Cultural</h1>
             </div>
-            <button
-              onClick={() => setIsFormOpen(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Nuevo Evento
-            </button>
           </div>
         </header>
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <Routes>
-            <Route path="/" element={
-              <EventList
-                events={events}
-                onEdit={handleEdit}
-                onDelete={deleteEvent}
-                filters={filters}
-                onFilterChange={setFilters}
-              />
-            } />
-            <Route path="/event/:id" element={
-              <EventDetails events={events} onEdit={handleEdit} onDelete={deleteEvent} />
-            } />
+            <Route
+              path="/"
+              element={
+                <EventList
+                  events={events}
+                  onEdit={handleEdit}
+                  onDelete={deleteEvent}
+                  filters={filters}
+                  onFilterChange={setFilters}
+                  onToggleFavorite={toggleFavorite}
+                />
+              }
+            />
+            <Route
+              path="/event/:id"
+              element={
+                <EventDetails
+                  events={events}
+                  onEdit={handleEdit}
+                  onDelete={deleteEvent}
+                  onToggleFavorite={toggleFavorite}
+                />
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 
-        {/* Modal Form */}
-        {isFormOpen && (
-          <EventForm
-            onSubmit={handleSubmit}
-            onClose={handleCloseForm}
-            initialData={editingEvent}
-          />
-        )}
+        {/* Active Section */}
+        <AnimatePresence>
+          {activeSection && renderActiveSection()}
+        </AnimatePresence>
+
+        {/* Bottom Navigation */}
+        <Navbar activeSection={activeSection} onSectionChange={setActiveSection} />
       </div>
     </Router>
   );

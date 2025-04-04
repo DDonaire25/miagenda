@@ -16,6 +16,11 @@ export interface EventFormData {
     isFree: boolean;
     amount?: number;
   };
+  isFavorite?: boolean;
+  reminder?: {
+    enabled: boolean;
+    minutesBefore: number;
+  };
 }
 
 export type EventFilters = {
@@ -24,3 +29,12 @@ export type EventFilters = {
   eventType?: string;
   date?: string;
 }
+
+export interface UserProfile {
+  name: string;
+  bio: string;
+  photo?: string;
+  theme?: 'light' | 'dark';
+}
+
+export type ActiveSection = 'search' | 'favorites' | 'create' | 'profile' | null;
