@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { UserProfile } from '../types';
 import { Camera, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
