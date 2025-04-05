@@ -3,7 +3,7 @@ import { EventFormData } from '../types';
 import { Calendar, MapPin, Users, Edit, Trash2, Share2, Download, Copy, QrCode, Heart, Bell } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { FacebookShareButton, TwitterShareButton, WhatsappShareButton } from 'react-share';
-
+import QRCode from 'react-qr-code';
 import toast from 'react-hot-toast';
 
 interface EventCardProps {
@@ -27,7 +27,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   const eventUrl = `${window.location.origin}/event/${event.id}`;
   
   const generateShareMessage = () => {
-    return `Agenda Cultural`
+    return `*AGENDA CULTURAL*`
            `📢 ${event.title}\n` +
            `📅 ${new Date(event.datetime).toLocaleDateString()} | 🕒 ${new Date(event.datetime).toLocaleTimeString()}\n` +
            `📍 ${event.location}\n` +
@@ -59,6 +59,16 @@ export const EventCard: React.FC<EventCardProps> = ({
     } catch (err) {
       console.error('Error copying text:', err);
       toast.error('Error al copiar el texto');
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(eventUrl);
+      toast.success('Enlace copiado al portapapeles');
+    } catch (err) {
+      console.error('Error copying link:', err);
+      toast.error('Error al copiar el enlace');
     }
   };
 
