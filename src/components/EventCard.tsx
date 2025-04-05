@@ -27,7 +27,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   const eventUrl = `${window.location.origin}/event/${event.id}`;
   
   const generateShareMessage = () => {
-    return `*AGENDA CULTURAL*`
+    return `AGENDA CULTURAL`
            `📢 ${event.title}\n` +
            `📅 ${new Date(event.datetime).toLocaleDateString()} | 🕒 ${new Date(event.datetime).toLocaleTimeString()}\n` +
            `📍 ${event.location}\n` +
